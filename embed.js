@@ -17,7 +17,6 @@
   // ponytail: forward the landing page's query string (FB ad params, UTMs) into the quiz iframe as-is.
   iframe.src = quizOrigin + '/' + window.location.search;
   iframe.title = 'Home loan eligibility quiz';
-  iframe.loading = 'lazy';
   iframe.className = 'fsb-eligibility-quiz-iframe';
   iframe.style.width = '100%';
   iframe.style.border = 'none';
