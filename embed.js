@@ -12,8 +12,11 @@
   iframe.loading = 'lazy';
   iframe.style.width = '100%';
   iframe.style.border = 'none';
-  iframe.style.minHeight = '100%';
-  iframe.style.height = '100%';
+  // ponytail: placeholder only — the host container has no defined height, so a
+  // percentage height here can't resolve and the iframe falls back to a tiny
+  // default. The 'message' listener below sets the real pixel height once the
+  // quiz reports its actual content height.
+  iframe.style.height = '520px';
   iframe.style.borderRadius = '12px';
   iframe.style.boxShadow = 'rgba(149, 157, 165, 0.2) 0px 8px 24px;';
   container.appendChild(iframe);

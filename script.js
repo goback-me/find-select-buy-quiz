@@ -91,10 +91,13 @@ function render() {
 }
 
 // ponytail: posts height to the parent frame so embed.js can resize the iframe; no-op outside an iframe.
+// Measures the card itself, not document.documentElement — the root element's scrollHeight is
+// defined as max(content, iframe viewport height), so once the iframe grows it can never report
+// a smaller height again, causing the iframe to only ever ratchet up.
 function reportHeight() {
   if (window.parent === window) return;
   window.parent.postMessage(
-    { source: 'eligibility-quiz', height: document.documentElement.scrollHeight },
+    { source: 'eligibility-quiz', height: card.scrollHeight },
     '*'
   );
 }
