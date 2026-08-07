@@ -1,5 +1,4 @@
 :root {
-  --bg: #F3EDE1;
   --card: #FFFFFF;
   --accent: #FF8400;
   --accent-soft: #FBEFE9;
@@ -11,28 +10,26 @@
 
 * { box-sizing: border-box; }
 
+html, body {
+  height: 100%;
+}
+
 body {
   margin: 0;
   font-family: 'General Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: var(--bg);
+  background: var(--card);
   color: var(--navy);
 }
 
 .page {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
+  min-height: 100%;
 }
 
 .card {
   background: var(--card);
   width: 100%;
-  max-width: 460px;
-  border-radius: 20px;
+  min-height: 100%;
   padding: 32px;
-  box-shadow: 0 20px 50px rgba(30, 42, 74, 0.08);
 }
 
 .eyebrow {

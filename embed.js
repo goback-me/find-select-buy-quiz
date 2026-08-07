@@ -6,7 +6,8 @@
   if (!container) return;
 
   var iframe = document.createElement('iframe');
-  iframe.src = quizOrigin + '/';
+  // ponytail: forward the landing page's query string (FB ad params, UTMs) into the quiz iframe as-is.
+  iframe.src = quizOrigin + '/' + window.location.search;
   iframe.title = 'Home loan eligibility quiz';
   iframe.loading = 'lazy';
   iframe.style.width = '100%';
@@ -16,8 +17,12 @@
 
   window.addEventListener('message', function (event) {
     if (event.origin !== quizOrigin) return;
-    if (event.data && event.data.source === 'eligibility-quiz' && event.data.height) {
+    if (!event.data || event.data.source !== 'eligibility-quiz') return;
+    if (event.data.height) {
       iframe.style.height = event.data.height + 'px';
+    }
+    if (event.data.redirect) {
+      window.location.href = event.data.redirect;
     }
   });
 })();

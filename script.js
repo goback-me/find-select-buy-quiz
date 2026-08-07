@@ -62,6 +62,9 @@ const QUESTIONS = [
 
 const TOTAL_STEPS = QUESTIONS.length + 1; // + contact step
 const STORAGE_KEY = 'eligibilityQuizSubmitted';
+const BOOKING_URL = 'https://findselectbuy.findlocal.au/booking-page';
+// ponytail: capture whatever tracking params the ad platform appended (lead_source, campaign, utm_*, ...) instead of hardcoding a key list.
+const trackingParams = Object.fromEntries(new URLSearchParams(location.search));
 
 // ponytail: pure function kept separate from render() so it stays testable without a DOM.
 function isDisqualifying(questionIndex, optionIndex) {
@@ -94,6 +97,16 @@ function reportHeight() {
     { source: 'eligibility-quiz', height: document.documentElement.scrollHeight },
     '*'
   );
+}
+
+// ponytail: keeps the same tracking params flowing to the booking page for attribution there too.
+function redirectToBooking() {
+  const url = BOOKING_URL + location.search;
+  if (window.parent === window) {
+    window.location.href = url;
+    return;
+  }
+  window.parent.postMessage({ source: 'eligibility-quiz', redirect: url }, '*');
 }
 
 function renderScreen() {
@@ -253,12 +266,12 @@ async function submitForm() {
         phone,
         qualified: !state.disqualified,
         answers: state.answers,
+        tracking: trackingParams,
       }),
     });
     if (!res.ok) throw new Error('submit failed');
     localStorage.setItem(STORAGE_KEY, '1');
-    state.screen = 'done';
-    render();
+    redirectToBooking();
   } catch (err) {
     state.screen = 'error';
     render();

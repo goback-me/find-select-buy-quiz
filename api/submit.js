@@ -4,7 +4,7 @@ module.exports = async (req, res) => {
     return;
   }
 
-  const { name, email, phone, qualified, answers } = req.body || {};
+  const { name, email, phone, qualified, answers, tracking } = req.body || {};
 
   if (!name || !email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !Array.isArray(answers)) {
     res.status(400).json({ error: 'Missing or invalid fields' });
@@ -27,6 +27,7 @@ module.exports = async (req, res) => {
         phone: phone || '',
         qualified: !!qualified,
         answers,
+        tracking: tracking && typeof tracking === 'object' ? tracking : {},
         submittedAt: new Date().toISOString(),
       }),
     });
