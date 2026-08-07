@@ -281,6 +281,8 @@ if (savedStatus === 'disqualified') {
   state.screen = 'already';
 }
 render();
+// ponytail: keeps the iframe height synced through orientation changes / mobile keyboard show-hide, not just screen transitions.
+window.addEventListener('resize', reportHeight);
 
 // ponytail: minimal self-check for the disqualify logic; run manually via ?test=1, not on every load.
 if (new URLSearchParams(location.search).has('test')) {
