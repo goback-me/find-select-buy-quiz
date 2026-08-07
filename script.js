@@ -224,6 +224,8 @@ function selectOption(index) {
   if (isDisqualifying(state.step, index)) {
     state.disqualified = true;
     state.screen = 'disqualified';
+    // ponytail: persist immediately so a refresh mid-flow can't be used to re-answer into qualifying.
+    localStorage.setItem(STORAGE_KEY, 'disqualified');
     render();
     return;
   }
@@ -270,7 +272,7 @@ async function submitForm() {
       }),
     });
     if (!res.ok) throw new Error('submit failed');
-    localStorage.setItem(STORAGE_KEY, '1');
+    localStorage.setItem(STORAGE_KEY, 'submitted');
     redirectToBooking();
   } catch (err) {
     state.screen = 'error';
@@ -278,7 +280,12 @@ async function submitForm() {
   }
 }
 
-if (localStorage.getItem(STORAGE_KEY)) {
+const savedStatus = localStorage.getItem(STORAGE_KEY);
+if (savedStatus === 'disqualified') {
+  state.disqualified = true;
+  state.screen = 'disqualified';
+} else if (savedStatus) {
+  // legacy '1' flag or 'submitted' — quiz was already completed
   state.screen = 'already';
 }
 render();
