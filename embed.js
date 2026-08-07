@@ -16,9 +16,6 @@
   iframe.style.height = '100%';
   iframe.style.borderRadius = '12px';
   iframe.style.boxShadow = 'rgba(149, 157, 165, 0.2) 0px 8px 24px;';
-  iframe.style.overflow = 'hidden';
-  // ponytail: height is kept in sync via postMessage below, so the iframe never needs its own scrollbar.
-  iframe.setAttribute('scrolling', 'no');
   container.appendChild(iframe);
 
   window.addEventListener('message', function (event) {

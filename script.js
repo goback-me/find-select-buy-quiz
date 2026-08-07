@@ -283,6 +283,8 @@ if (savedStatus === 'disqualified') {
 render();
 // ponytail: keeps the iframe height synced through orientation changes / mobile keyboard show-hide, not just screen transitions.
 window.addEventListener('resize', reportHeight);
+// ponytail: the webfont loads async now (for faster first paint) and can reflow text taller once it swaps in — resync height when that happens so the iframe doesn't stay clipped to the fallback font's size.
+if (document.fonts) document.fonts.ready.then(reportHeight);
 
 // ponytail: minimal self-check for the disqualify logic; run manually via ?test=1, not on every load.
 if (new URLSearchParams(location.search).has('test')) {
