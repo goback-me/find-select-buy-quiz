@@ -12,7 +12,10 @@
   iframe.loading = 'lazy';
   iframe.style.width = '100%';
   iframe.style.border = 'none';
-  iframe.style.minHeight = '520px';
+  iframe.style.minHeight = '100%';
+  iframe.style.height = '100%';
+  iframe.style.borderRadius = '12px';
+  iframe.style.boxShadow = 'rgba(149, 157, 165, 0.2) 0px 8px 24px;';
   container.appendChild(iframe);
 
   window.addEventListener('message', function (event) {
