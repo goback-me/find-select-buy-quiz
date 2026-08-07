@@ -72,7 +72,7 @@ function isDisqualifying(questionIndex, optionIndex) {
 }
 
 const state = {
-  screen: 'question', // question | qualified | disqualified | contact | done | already
+  screen: 'question', // question | contact | submitting | error | already
   step: 0,
   answers: [],
   disqualified: false,
@@ -146,24 +146,6 @@ function renderScreen() {
     return;
   }
 
-  if (state.screen === 'qualified' || state.screen === 'disqualified') {
-    const qualified = state.screen === 'qualified';
-    card.innerHTML = `
-      <p class="eyebrow">Eligibility Check</p>
-      ${progressBar(QUESTIONS.length)}
-      <div class="result-icon">${qualified ? '🎉' : '👋'}</div>
-      <h1>${qualified ? "You're looking eligible!" : "Thanks for sharing that"}</h1>
-      <p class="result-message">${qualified
-        ? "Based on your answers, you look like a great fit. Leave your details below and one of our specialists will be in touch to walk you through your options."
-        : "Based on your answers, this particular pathway might not be the right fit right now, but everyone's situation is different. Leave your details below and we'll follow up with options that could still work for you."}</p>
-    `;
-    setTimeout(() => {
-      state.screen = 'contact';
-      render();
-    }, 3000);
-    return;
-  }
-
   if (state.screen === 'contact') {
     card.innerHTML = `
       <p class="eyebrow">Almost done</p>
@@ -223,7 +205,7 @@ function selectOption(index) {
 
   if (isDisqualifying(state.step, index)) {
     state.disqualified = true;
-    state.screen = 'disqualified';
+    state.screen = 'contact';
     // ponytail: persist immediately so a refresh mid-flow can't be used to re-answer into qualifying.
     localStorage.setItem(STORAGE_KEY, 'disqualified');
     render();
@@ -234,7 +216,7 @@ function selectOption(index) {
     state.step += 1;
     render();
   } else {
-    state.screen = 'qualified';
+    state.screen = 'contact';
     render();
   }
 }
@@ -282,8 +264,9 @@ async function submitForm() {
 
 const savedStatus = localStorage.getItem(STORAGE_KEY);
 if (savedStatus === 'disqualified') {
+  // already disqualified from a prior visit — go straight to the contact form, not back through the quiz
   state.disqualified = true;
-  state.screen = 'disqualified';
+  state.screen = 'contact';
 } else if (savedStatus) {
   // legacy '1' flag or 'submitted' — quiz was already completed
   state.screen = 'already';
