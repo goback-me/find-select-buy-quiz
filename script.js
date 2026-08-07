@@ -72,7 +72,7 @@ function isDisqualifying(questionIndex, optionIndex) {
 }
 
 const state = {
-  screen: 'question', // question | contact | submitting | error | already
+  screen: 'question', // question | disqualified | contact | submitting | error | already
   step: 0,
   answers: [],
   disqualified: false,
@@ -115,6 +115,16 @@ function renderScreen() {
       <p class="eyebrow">Eligibility Check</p>
       <h1>You've already completed this quiz</h1>
       <p class="result-message">Looks like you've already submitted your answers from this device. If your circumstances have changed or you need to update your details, just email us directly and we'll take care of it.</p>
+    `;
+    return;
+  }
+
+  if (state.screen === 'disqualified') {
+    card.innerHTML = `
+      <p class="eyebrow">Eligibility Check</p>
+      <div class="result-icon">👋</div>
+      <h1>Thanks for sharing that</h1>
+      <p class="result-message">Based on your answers, this particular pathway isn't the right fit right now. If your circumstances change, feel free to check back.</p>
     `;
     return;
   }
@@ -205,8 +215,8 @@ function selectOption(index) {
 
   if (isDisqualifying(state.step, index)) {
     state.disqualified = true;
-    state.screen = 'contact';
-    // ponytail: persist immediately so a refresh mid-flow can't be used to re-answer into qualifying.
+    state.screen = 'disqualified';
+    // ponytail: persist immediately so a refresh can't be used to re-answer into qualifying.
     localStorage.setItem(STORAGE_KEY, 'disqualified');
     render();
     return;
@@ -264,9 +274,8 @@ async function submitForm() {
 
 const savedStatus = localStorage.getItem(STORAGE_KEY);
 if (savedStatus === 'disqualified') {
-  // already disqualified from a prior visit — go straight to the contact form, not back through the quiz
   state.disqualified = true;
-  state.screen = 'contact';
+  state.screen = 'disqualified';
 } else if (savedStatus) {
   // legacy '1' flag or 'submitted' — quiz was already completed
   state.screen = 'already';
