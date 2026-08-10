@@ -45,6 +45,13 @@
       if (event.data.redirect) {
         window.location.href = event.data.redirect;
       }
+      // ponytail: the quiz iframe no longer loads its own Meta Pixel (that was firing a
+      // duplicate PageView on top of GHL's page-level pixel, and never fired a real conversion
+      // event anyway). It now asks us to fire the real Lead event on the pixel this host page
+      // already has loaded, right when someone actually completes the quiz.
+      if (event.data.event === 'lead' && typeof fbq === 'function') {
+        fbq('track', 'Lead');
+      }
     });
   }
 })();

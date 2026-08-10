@@ -7,24 +7,7 @@
 <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
 <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
 <link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap" media="print" onload="this.media='all'">
-<!-- Meta Pixel Code -->
-<script>
-!function(f,b,e,v,n,t,s)
-{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-n.queue=[];t=b.createElement(e);t.async=!0;
-t.src=v;s=b.getElementsByTagName(e)[0];
-s.parentNode.insertBefore(t,s)}(window, document,'script',
-'https://connect.facebook.net/en_US/fbevents.js');
-fbq('init', '2715840992076038');
-fbq('track', 'PageView');
-</script>
-<noscript><img height="1" width="1" style="display:none"
-src="https://www.facebook.com/tr?id=2715840992076038&ev=PageView&noscript=1"
-/></noscript>
-<!-- End Meta Pixel Code -->
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=optional" media="print" onload="this.media='all'">
 </head>
 <body>
 <div class="page">
@@ -301,6 +284,12 @@ async function submitForm() {
     });
     if (!res.ok) throw new Error('submit failed');
     localStorage.setItem(STORAGE_KEY, 'submitted');
+    // ponytail: tell the parent page (which already has the Meta Pixel loaded via GHL) to fire
+    // the real conversion event — this replaces the old duplicate pixel that used to live in
+    // this iframe and only fired PageView, never an actual Lead event.
+    if (window.parent !== window) {
+      window.parent.postMessage({ source: 'eligibility-quiz', event: 'lead' }, '*');
+    }
     redirectToBooking();
   } catch (err) {
     state.screen = 'error';
