@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=optional" media="print" onload="this.media='all'">
-
+<link rel="preload" href="https://data.tryrevvy.com.au/embed-track.js" as="script">
 <script>
   !function(f,b,e,v,n,t,s)
   {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -91,7 +91,6 @@ const QUESTIONS = [
 ];
 
 const TOTAL_STEPS = QUESTIONS.length + 1; // + contact step
-const STORAGE_KEY = 'eligibilityQuizSubmitted';
 const BOOKING_URL = 'https://findselectbuy.findlocal.au/booking-page';
 // ponytail: capture whatever tracking params the ad platform appended (lead_source, campaign, utm_*, ...) instead of hardcoding a key list.
 const trackingParams = Object.fromEntries(new URLSearchParams(location.search));
@@ -102,7 +101,7 @@ function isDisqualifying(questionIndex, optionIndex) {
 }
 
 const state = {
-  screen: 'question', // question | disqualified | contact | submitting | error | already
+  screen: 'question', // question | disqualified | contact | submitting | error
   step: 0,
   answers: [],
   disqualified: false,
@@ -143,15 +142,6 @@ function redirectToBooking() {
 }
 
 function renderScreen() {
-  if (state.screen === 'already') {
-    card.innerHTML = `
-      <p class="eyebrow">Eligibility Check</p>
-      <h1>You've already completed this quiz</h1>
-      <p class="result-message">Looks like you've already submitted your answers from this device. If your circumstances have changed or you need to update your details, just email us directly and we'll take care of it.</p>
-    `;
-    return;
-  }
-
   if (state.screen === 'disqualified') {
     card.innerHTML = `
       <p class="eyebrow">Eligibility Check</p>
@@ -204,12 +194,15 @@ function renderScreen() {
       </div>
       <div class="field">
         <label for="phone">Phone</label>
-        <input id="phone" type="tel" autocomplete="tel" />
+        <input id="phone" type="tel" inputmode="numeric" autocomplete="tel" />
       </div>
-      <p class="error" id="contact-error">Please enter your name and a valid email.</p>
+      <p class="error" id="contact-error"></p>
       <button class="btn" id="submit-btn">Submit</button>
     `;
     document.getElementById('submit-btn').addEventListener('click', submitForm);
+    document.getElementById('phone').addEventListener('input', (e) => {
+      e.target.value = e.target.value.replace(/[^\d\s+()-]/g, '');
+    });
     return;
   }
 
@@ -244,8 +237,6 @@ function selectOption(index) {
   if (isDisqualifying(state.step, index)) {
     state.disqualified = true;
     state.screen = 'disqualified';
-    // ponytail: persist immediately so a refresh can't be used to re-answer into qualifying.
-    localStorage.setItem(STORAGE_KEY, 'disqualified');
     render();
     return;
   }
@@ -263,13 +254,23 @@ function isValidEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
+function isValidPhone(value) {
+  return /^\d{8,15}$/.test(value.replace(/[\s+()-]/g, ''));
+}
+
 async function submitForm() {
   const name = document.getElementById('name').value.trim();
   const email = document.getElementById('email').value.trim();
   const phone = document.getElementById('phone').value.trim();
   const errorEl = document.getElementById('contact-error');
 
-  if (!name || !isValidEmail(email)) {
+  let errorMessage = '';
+  if (!name) errorMessage = 'Please enter your full name.';
+  else if (!isValidEmail(email)) errorMessage = 'Please enter a valid email address.';
+  else if (!isValidPhone(phone)) errorMessage = 'Please enter a valid phone number.';
+
+  if (errorMessage) {
+    errorEl.textContent = errorMessage;
     errorEl.classList.add('show');
     return;
   }
@@ -293,7 +294,6 @@ async function submitForm() {
       }),
     });
     if (!res.ok) throw new Error('submit failed');
-    localStorage.setItem(STORAGE_KEY, 'submitted');
     // ponytail: tell the parent page (which already has the Meta Pixel loaded via GHL) to fire
     // the real conversion event — this replaces the old duplicate pixel that used to live in
     // this iframe and only fired PageView, never an actual Lead event.
@@ -307,14 +307,6 @@ async function submitForm() {
   }
 }
 
-const savedStatus = localStorage.getItem(STORAGE_KEY);
-if (savedStatus === 'disqualified') {
-  state.disqualified = true;
-  state.screen = 'disqualified';
-} else if (savedStatus) {
-  // legacy '1' flag or 'submitted' — quiz was already completed
-  state.screen = 'already';
-}
 render();
 // ponytail: keeps the iframe height synced through orientation changes / mobile keyboard show-hide, not just screen transitions.
 window.addEventListener('resize', reportHeight);
