@@ -18,7 +18,7 @@
   t.src=v;s=b.getElementsByTagName(e)[0];
   s.parentNode.insertBefore(t,s)}(window, document,'script',
   'https://facebook.net');
-  fbq('init', '1079184654639247'); 
+  fbq('init', '1385449756851934'); 
   fbq('track', 'PageView');
 </script>
 
@@ -213,11 +213,6 @@ function renderScreen() {
     return;
   }
 
-  if (state.screen === 'submitting') {
-    card.innerHTML = `<p class="eyebrow">Eligibility Check</p><h1>Submitting your details...</h1>`;
-    return;
-  }
-
   if (state.screen === 'done') {
     card.innerHTML = `
       <p class="eyebrow">All set</p>
@@ -280,8 +275,9 @@ async function submitForm() {
   }
   errorEl.classList.remove('show');
 
-  state.screen = 'submitting';
-  render();
+  const submitBtn = document.getElementById('submit-btn');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Submitting...';
 
   try {
     const res = await fetch('/api/submit', {
